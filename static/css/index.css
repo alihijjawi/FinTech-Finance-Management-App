@@ -5,6 +5,12 @@ body {
   
 }
 
+.center {
+  margin: auto;
+  width: 5%;
+  padding: 10px;
+}
+
 #exit { 
   height:30px;
   width:30px;

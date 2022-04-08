@@ -3,17 +3,26 @@
   <head>
     <title>Pre-Game Menu</title>
     <link
-      href="{{ url_for('static', filename='index.css') }}"
+      href="{{ url_for('static', filename='css/index.css') }}"
       rel="stylesheet"
       type="text/css"
     />
   </head>
 
   <body>
+    {%if user is not none%}
+    <div class="center">
+    <h1 style="color:white;">{{user}}</h1>
+    <form style="margin:0 auto;" action="/logout">
+      <input style="margin:0 auto;" type="submit" value="Logout">
+    </form>
+  </div>
+    {%endif%}
+   
     <div id="allthethings">
       <div id="left"></div>
       <div id="single">
-        <p>PLAY</p>
+        <p><a style='text-decoration: none; color:white;'href="/login">PLAY</a></p>
       </div>
       <div id="tutorial">
         <p>TUTORIAL</p>
@@ -27,7 +36,18 @@
       <div id="right"></div>
       <div id="top"></div>
       <div id="exit"></div>
-      <div id="circle"></div>
+      
+      <div id="circle" class="circ">
+      </div>
+     
     </div>
+
+    <script>
+
+      $(".circ").click(function() {
+        window.location = $(this).find("a").attr("href"); 
+        return false;
+      });
+    </script>
   </body>
 </html>
