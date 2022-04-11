@@ -57,5 +57,40 @@ def logout():
     else:
         return redirect(url_for('main'))
 
+
+@app.route('/cryptocurrencies',methods=['GET'])
+def getAllCryptos():
+    pass
+
+@app.route('/stocks',methods=['GET'])
+def getAllStocks():
+    pass
+
+@app.route('/cryptocurrencies/<crypto>',methods=['GET','POST'])
+def getCrypto(crypto):
+    pass
+
+@app.route('/cryptocurrencies/<stock>',methods=['GET','POST'])
+def getStock(stock):
+    pass
+
+@app.route('/sellcrypto/<crypto>',methods=['GET','POST'])
+def sellCrypto(crypto):
+    pass
+
+
+
+
+
+
+@app.route('/buystock',methods=['GET'])
+def getAllStocks():
+    pass
+
+@app.route('/buystock/<stock>',methods=['GET','POST'])
+def getStock(stock):
+    pass
+
 if __name__ == "__main__":
     app.run(debug=True)
+git commit -m "added prototypes for buying and selling stock/crypto + added logo"
