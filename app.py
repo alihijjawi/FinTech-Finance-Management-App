@@ -57,40 +57,53 @@ def logout():
     else:
         return redirect(url_for('main'))
 
-
+#api to get all crypto currencies from db
 @app.route('/cryptocurrencies',methods=['GET'])
 def getAllCryptos():
     pass
-
+#api to get all stocks from db
 @app.route('/stocks',methods=['GET'])
 def getAllStocks():
     pass
-
+#api to get specific crypto curr
 @app.route('/cryptocurrencies/<crypto>',methods=['GET','POST'])
 def getCrypto(crypto):
     pass
 
-@app.route('/cryptocurrencies/<stock>',methods=['GET','POST'])
+#api to get specific stock
+@app.route('/stockc/<stock>',methods=['GET','POST'])
 def getStock(stock):
     pass
 
+#api to sell specific crypto, expects user token/id as well as amount to sell
+#will update amount of money the user has in the bank on sell
 @app.route('/sellcrypto/<crypto>',methods=['GET','POST'])
 def sellCrypto(crypto):
     pass
-
-
-
-
-
-
-@app.route('/buystock',methods=['GET'])
-def getAllStocks():
+#api to sell specific sotck, expects user token/id as well as amount to sell
+#will update amount of money the user has in the bank on sell
+@app.route('/sellstock/<stock>',methods=['GET','POST'])
+def sellStock(stock):
     pass
 
+#api to buy specific crypto currency, expects user token/id as well as amount to buy
+#will update amount of money/crypto the user has in the bank on buy
+@app.route('/buycrypto/<crypto>',methods=['GET','POST'])
+def buyCrypto(crypto):
+    pass
+#api to buy specific crypto currency, expects user token/id as well as amount to buy
+#will update amount of money/scrypto the user has in the bank on buy
 @app.route('/buystock/<stock>',methods=['GET','POST'])
-def getStock(stock):
+def sellStock(stock):
     pass
+#this api returns everything owned by the user that is stored in the bank
+@app.route('getbank',methods=['get'])
+def getbank():
+    pass
+
+
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)
-git commit -m "added prototypes for buying and selling stock/crypto + added logo"
