@@ -33,6 +33,7 @@ def login():
     return render_template('login.html')
 
 
+#sign up to the database and intialize stock and crypto values to 0
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if 'user' in session:
@@ -71,34 +72,39 @@ def getCrypto(crypto):
     pass
 
 #api to get specific stock
-@app.route('/stockc/<stock>',methods=['GET','POST'])
+@app.route('/stocks/<stock>',methods=['GET','POST'])
 def getStock(stock):
     pass
 
 #api to sell specific crypto, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
-@app.route('/sellcrypto/<crypto>',methods=['GET','POST'])
+@app.route('/sellcrypto/<crypto>',methods=['POST'])
 def sellCrypto(crypto):
     pass
 #api to sell specific sotck, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
-@app.route('/sellstock/<stock>',methods=['GET','POST'])
+@app.route('/sellstock/<stock>',methods=['POST'])
 def sellStock(stock):
     pass
 
 #api to buy specific crypto currency, expects user token/id as well as amount to buy
 #will update amount of money/crypto the user has in the bank on buy
-@app.route('/buycrypto/<crypto>',methods=['GET','POST'])
+@app.route('/buycrypto/<crypto>',methods=['POST'])
 def buyCrypto(crypto):
     pass
+
 #api to buy specific crypto currency, expects user token/id as well as amount to buy
 #will update amount of money/scrypto the user has in the bank on buy
-@app.route('/buystock/<stock>',methods=['GET','POST'])
-def sellStock(stock):
+@app.route('/buystock/<stock>',methods=['POST'])
+def buyStock(stock):
     pass
+
 #this api returns everything owned by the user that is stored in the bank
-@app.route('getbank',methods=['get'])
+@app.route('/getbank',methods=['get'])
 def getbank():
+    pass
+
+def getPrices():
     pass
 
 
