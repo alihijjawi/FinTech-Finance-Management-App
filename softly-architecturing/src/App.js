@@ -7,6 +7,7 @@ import About from './pages/about';
 import Blogs from './pages/blogs';
 import SignUp from './pages/signup';
 import SignIn from './pages/signin';
+import Shop from './pages/shop';
 
 function App() {
 return (
@@ -17,6 +18,7 @@ return (
 		<Route path='/about' element={<About/>}/>
 		<Route path='/blogs' element={<Blogs/>}/>
 		<Route path='/sign-up' element={<SignUp/>}/>
+		<Route path='/shop' element={<Shop/>}/>
 	</Routes>
 	</Router>
 );
