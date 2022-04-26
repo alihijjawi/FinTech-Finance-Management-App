@@ -1,20 +1,12 @@
 import datetime
 
-from flask import Flask, abort, session , render_template
+from flask import Flask, abort, session , render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
-from flask_bcrypt import Bcrypt
 from flask_cors import CORS, cross_origin
-from flask_marshmallow import Marshmallow
-from flask import request
-from flask import jsonify
-from flask_session import Session
-from flask_mail import Mail, Message
 import os
-import jwt
 
 app = Flask(__name__)
-
 app.secret_key = '\xf0?a\x9a\\\xff\xd4;\x0c\xcbHi'
 basedir = os.path.abspath(os.path.dirname(__file__))
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'Project_DB.db')
@@ -22,25 +14,56 @@ engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 db = SQLAlchemy(app)
 meta = MetaData()
 
-#use to determine the cryptos/stocks used in the app
+
+class User(db.Model):
+    __tablename__ = "users"
+    id = db.Column(db.Integer(),primary_key=True,autoincrement=True)
+    username=db.Column(db.String(50))
+    pwd = db.Column(db.String(50))
+    def __init__(self,username,pwd):
+        self.username=username
+        self.pwd=pwd
+
+class Stock(db.Model):
+    __tablename__ = "stocks"
+    entry = db.Column(db.Integer(),primary_key=True,autoincrement=True)
+    user_id = db.Column(db.Integer())
+    stock_name = db.Column(db.String(50))
+    amount = db.Column(db.Integer())
+    def __init__(self, user_id, stock_name, amount):
+        self.user_id = user_id
+        self.stock_name = stock_name
+        self.amount = amount
+
+class Crypto(db.Model):
+    __tablename__ ="cryptos"
+    entry = db.Column(db.Integer(),primary_key=True,autoincrement=True)
+    user_id=db.Column(db.Integer())
+    crypto_name=db.Column(db.String(50))
+    amount= db.Column(db.Integer())
+    def __init__(self,user_id,crypto_name,amount):
+        self.user_id=user_id
+        self.crypto_name=crypto_name
+        self.amount =amount
+
+class Bank(db.Model):
+    __tablename__ = "bank"
+    user_id=db.Column(db.Integer(),primary_key=True)
+    amount=db.Column(db.Integer())
+    def __init__(self,user_id,amount):
+        self.user_id=user_id
+        self.amount= amount
+
+
+
 stock_name=[]
 crypto_name=[]
-# @app.route("/")
-# def main():
-#     if 'user' in session:
-#         user = session['user']
-#     else:
-#         user = None
-#     return render_template('index.html',user=user)
+
 userstable = Table('users', meta, Column('id', Integer, primary_key=True, autoincrement=True),
                    Column('username', String ))
 banktable= Table('bank', meta, Column('user_id',Integer,primary_key=True,autoincrement=False),Column("amount",Integer))
 
 
-from .Models.user import User
-from .Models.bank import Bank
-from .Models.crypto import Crypto
-from .Models.stock import Stock
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -78,25 +101,6 @@ def signup():
         new_bank=Bank(newu.id,0)
         db.session.add(new_bank)
         db.session.commit()
-
-        #########
-        # ⢀⡴⠑⡄⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-        # ⠸⡇⠀⠿⡀⠀⠀⠀⣀⡴⢿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⠑⢄⣠⠾⠁⣀⣄⡈⠙⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⢀⡀⠁⠀⠀⠈⠙⠛⠂⠈⣿⣿⣿⣿⣿⠿⡿⢿⣆⠀⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⢀⡾⣁⣀⠀⠴⠂⠙⣗⡀⠀⢻⣿⣿⠭⢤⣴⣦⣤⣹⠀⠀⠀⢀⢴⣶⣆
-        # ⠀⠀⢀⣾⣿⣿⣿⣷⣮⣽⣾⣿⣥⣴⣿⣿⡿⢂⠔⢚⡿⢿⣿⣦⣴⣾⠁⠸⣼⡿
-        # ⠀⢀⡞⠁⠙⠻⠿⠟⠉⠀⠛⢹⣿⣿⣿⣿⣿⣌⢤⣼⣿⣾⣿⡟⠉⠀⠀⠀⠀⠀
-        # ⠀⣾⣷⣶⠇⠀⠀⣤⣄⣀⡀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
-        # ⠀⠉⠈⠉⠀⠀⢦⡈⢻⣿⣿⣿⣶⣶⣶⣶⣤⣽⡹⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⠀⠀⠀⠉⠲⣽⡻⢿⣿⣿⣿⣿⣿⣿⣷⣜⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣶⣮⣭⣽⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⠀⠀⣀⣀⣈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
-        # ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⠿⠿⠿⠿⠛⠉
-        #TOOOOOOOOOOOOO DOOOOOOOOOOOOO instantiate entries for crypto and stocks once types are decided
-
         return "success"
 
 
@@ -172,7 +176,10 @@ def buyCrypto():
     price = request.json['price']
     # update money in bank
     user_bank = Bank.query.filter_by(user_id=user_id)
-    user_bank.amount = 0 if user_bank.amount-(int(price) * int(amount))<0 else user_bank.amount=user_bank.amount-(int(price) * int(amount))<0
+    if user_bank.amount-(int(price) * int(amount))<0:
+        user_bank.amount = 0  
+    else: 
+        user_bank.amount=user_bank.amount-(int(price) * int(amount))
     # update amount of crypto owned
     user_crypto = Crypto.query.filter_by(user_id=user_id, crypto_name=crypto_name)
 
@@ -191,7 +198,10 @@ def buyStock():
     price = request.json['price']
     # update money in bank
     user_bank = Bank.query.filter_by(user_id=user_id)
-    user_bank.amount = 0 if user_bank.amount - (int(price) * int(amount)) < 0 else user_bank.amount = user_bank.amount - (int(price) * int(amount)) < 0
+    if user_bank.amount - (int(price) * int(amount)) < 0:
+        user_bank.amount = 0  
+    else: 
+        user_bank.amount = user_bank.amount - (int(price) * int(amount)) < 0
     # update amount of crypto owned
     user_stock = Stock.query.filter_by(user_id=user_id, stock_name=stock_name)
 
