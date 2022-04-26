@@ -76,19 +76,29 @@ def signup():
         new_bank=Bank(newu.id,0)
         db.session.add(new_bank)
         db.session.commit()
-        #to DO: instantiate entries for crypto and stocks once types are decided
+
+        #########
+        # ⢀⡴⠑⡄⠀⠀⠀⠀⠀⠀⠀⣀⣀⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        # ⠸⡇⠀⠿⡀⠀⠀⠀⣀⡴⢿⣿⣿⣿⣿⣿⣿⣿⣷⣦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⠑⢄⣠⠾⠁⣀⣄⡈⠙⣿⣿⣿⣿⣿⣿⣿⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⢀⡀⠁⠀⠀⠈⠙⠛⠂⠈⣿⣿⣿⣿⣿⠿⡿⢿⣆⠀⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⢀⡾⣁⣀⠀⠴⠂⠙⣗⡀⠀⢻⣿⣿⠭⢤⣴⣦⣤⣹⠀⠀⠀⢀⢴⣶⣆
+        # ⠀⠀⢀⣾⣿⣿⣿⣷⣮⣽⣾⣿⣥⣴⣿⣿⡿⢂⠔⢚⡿⢿⣿⣦⣴⣾⠁⠸⣼⡿
+        # ⠀⢀⡞⠁⠙⠻⠿⠟⠉⠀⠛⢹⣿⣿⣿⣿⣿⣌⢤⣼⣿⣾⣿⡟⠉⠀⠀⠀⠀⠀
+        # ⠀⣾⣷⣶⠇⠀⠀⣤⣄⣀⡀⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
+        # ⠀⠉⠈⠉⠀⠀⢦⡈⢻⣿⣿⣿⣶⣶⣶⣶⣤⣽⡹⣿⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⠀⠀⠀⠉⠲⣽⡻⢿⣿⣿⣿⣿⣿⣿⣷⣜⣿⣿⣿⡇⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⠀⠀⠀⠀⢸⣿⣿⣷⣶⣮⣭⣽⣿⣿⣿⣿⣿⣿⣿⠀⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⠀⠀⣀⣀⣈⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠇⠀⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⠀⠀⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠃⠀⠀⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⠀⠀⠀⠹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠟⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
+        # ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠛⠻⠿⠿⠿⠿⠛⠉
+        #TOOOOOOOOOOOOO DOOOOOOOOOOOOO instantiate entries for crypto and stocks once types are decided
 
         return "success"
 
 
 
-# @app.route('/logout', methods=['GET'])
-# def logout():
-#     if 'user' in session:
-#         session.pop('user', None)
-#         return redirect(url_for('main'))
-#     else:
-#         return redirect(url_for('main'))
 
 #api to get all crypto currencies from db
 @app.route('/cryptocurrencies',methods=['GET'])
@@ -134,7 +144,21 @@ def sellCrypto():
 #will update amount of money the user has in the bank on sell
 @app.route('/sellstock',methods=['POST'])
 def sellStock():
-    pass
+    user_id = request.json['id']
+    stock_name = request.json['name']
+    amount = request.json['amount']
+    price = request.json['price']
+    # update money in bank
+    user_bank = Bank.query.filter_by(user_id=user_id)
+    user_bank.amount = user_bank.amount + int(price) * int(amount)
+    # update amount of crypto owned
+    user_stock = Stock.query.filter_by(user_id=user_id, stock_name=stock_name)
+    if user_stock.amount - amount < 0:
+        user_stock.amount = 0
+    else:
+        user_stock.amount = user_stock.amount - amount
+    db.session.commit()
+    return "success"
 
 #api to buy specific crypto currency, expects user token/id as well as amount to buy
 #will update amount of money/crypto the user has in the bank on buy
@@ -148,10 +172,14 @@ def buyCrypto(crypto):
 def buyStock(stock):
     pass
 
-#this api returns everything owned by the user that is stored in the bank
+#this api returns money owned by the user that is stored in the bank
 @app.route('/getbank',methods=['get'])
 def getbank():
-    pass
+    user_id = request.json['id']
+    user_bank= - Bank.query.filter_by(user_id=user_id)
+    return jsonify({"money":user_bank.amount})
+
+
 
 def getPrices():
     pass
