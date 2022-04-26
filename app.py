@@ -22,7 +22,9 @@ engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 db = SQLAlchemy(app)
 meta = MetaData()
 
-
+#use to determine the cryptos/stocks used in the app
+stock_name=[]
+crypto_name=[]
 # @app.route("/")
 # def main():
 #     if 'user' in session:
@@ -162,14 +164,27 @@ def sellStock():
 
 #api to buy specific crypto currency, expects user token/id as well as amount to buy
 #will update amount of money/crypto the user has in the bank on buy
-@app.route('/buycrypto/<crypto>',methods=['POST'])
-def buyCrypto(crypto):
-    pass
+@app.route('/buycrypto',methods=['POST'])
+def buyCrypto():
+    user_id = request.json['id']
+    crypto_name = request.json['name']
+    amount = request.json['amount']
+    price = request.json['price']
+    # update money in bank
+    user_bank = Bank.query.filter_by(user_id=user_id)
+    user_bank.amount = 0 if user_bank.amount-(int(price) * int(amount))<0 else user_bank.amount=user_bank.amount-(int(price) * int(amount))<0
+    # update amount of crypto owned
+    user_crypto = Crypto.query.filter_by(user_id=user_id, crypto_name=crypto_name)
+
+    user_crypto.amount = user_crypto.amount + amount
+
+    db.session.commit()
+    return "success"
 
 #api to buy specific crypto currency, expects user token/id as well as amount to buy
 #will update amount of money/scrypto the user has in the bank on buy
-@app.route('/buystock/<stock>',methods=['POST'])
-def buyStock(stock):
+@app.route('/buystock',methods=['POST'])
+def buyStock():
     pass
 
 #this api returns money owned by the user that is stored in the bank
