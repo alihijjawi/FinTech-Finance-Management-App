@@ -111,16 +111,16 @@ def getStock(stock):
 #api to sell specific crypto, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
 @app.route('/sellcrypto',methods=['POST'])
-def sellCrypto(crypto):
+def sellCrypto():
     user_id = request.json['id']
     crypto_name=request.json['name']
     amount = request.json['amount']
     price = request.json['price']
     #update money in bank
-    user_bank = Bank.query.filter_by(user_id=id)
+    user_bank = Bank.query.filter_by(user_id=user_id)
     user_bank.amount=user_bank.amount+int(price)*int(amount)
     #update amount of crypto owned
-    user_crypto=Crypto.query.filter_by(user_id=id,crypto_name=crypto_name)
+    user_crypto=Crypto.query.filter_by(user_id=user_id,crypto_name=crypto_name)
     if user_crypto.amount-amount<0:
         user_crypto.amount=0
     else:
@@ -132,8 +132,8 @@ def sellCrypto(crypto):
 
 #api to sell specific sotck, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
-@app.route('/sellstock/<stock>',methods=['POST'])
-def sellStock(stock):
+@app.route('/sellstock',methods=['POST'])
+def sellStock():
     pass
 
 #api to buy specific crypto currency, expects user token/id as well as amount to buy
