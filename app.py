@@ -185,7 +185,20 @@ def buyCrypto():
 #will update amount of money/scrypto the user has in the bank on buy
 @app.route('/buystock',methods=['POST'])
 def buyStock():
-    pass
+    user_id = request.json['id']
+    stock_name = request.json['name']
+    amount = request.json['amount']
+    price = request.json['price']
+    # update money in bank
+    user_bank = Bank.query.filter_by(user_id=user_id)
+    user_bank.amount = 0 if user_bank.amount - (int(price) * int(amount)) < 0 else user_bank.amount = user_bank.amount - (int(price) * int(amount)) < 0
+    # update amount of crypto owned
+    user_stock = Stock.query.filter_by(user_id=user_id, stock_name=stock_name)
+
+    user_stock.amount = user_stock.amount + amount
+
+    db.session.commit()
+    return "success"
 
 #this api returns money owned by the user that is stored in the bank
 @app.route('/getbank',methods=['get'])
