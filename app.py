@@ -1,11 +1,13 @@
 import datetime
-
+import finnhub
 from flask import Flask, abort, session , render_template, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
 from flask_cors import CORS, cross_origin
 import os
-
+import requests
+import json
+finnhub_client = finnhub.Client(api_key="c9ommfaad3i8gdca97sg")
 app = Flask(__name__)
 app.secret_key = '\xf0?a\x9a\\\xff\xd4;\x0c\xcbHi'
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -13,6 +15,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'Pr
 engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
 db = SQLAlchemy(app)
 meta = MetaData()
+payload = {}
+headers= {}
+crypto_url = "http://api.coincap.io/v2/assets/"
 
 
 class User(db.Model):
@@ -117,12 +122,16 @@ def getAllStocks():
 #api to get specific crypto curr
 @app.route('/cryptocurrencies/<crypto>',methods=['GET','POST'])
 def getCrypto(crypto):
-    pass
+    result = requests.request('GET',crypto_url+crypto,data=payload,headers=headers)
+    ret = json.loads(result.text.encode('utf8'))
 
-#api to get specific stock
+    return str(ret['data']['priceUsd'])
+
+#api to get specific stock price
 @app.route('/stocks/<stock>',methods=['GET','POST'])
 def getStock(stock):
-    pass
+    return finnhub_client.quote(stock)
+
 
 #api to sell specific crypto, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
