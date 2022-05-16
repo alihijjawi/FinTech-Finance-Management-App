@@ -1,6 +1,4 @@
-#bank class
-#will hold financial info about the user (money/stocks/crypto owned) as well as
-from ..app import db
+from app import db;
 class Bank(db.Model):
     __tablename__ = "bank"
     user_id=db.Column(db.Integer(),primary_key=True)
