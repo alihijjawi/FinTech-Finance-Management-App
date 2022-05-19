@@ -1,0 +1,32 @@
+drop table bankaccount;
+drop table crypto;
+drop table stock;
+drop table users;
+
+
+CREATE TABLE users (
+    username VARCHAR(30) PRIMARY KEY,
+    password VARCHAR(30) NOT NULL
+);  
+
+CREATE TABLE bankaccount (
+    username VARCHAR(30) PRIMARY KEY,
+    money INT,
+	FOREIGN KEY(username) REFERENCES users(username)
+);  
+
+CREATE TABLE crypto (
+    username VARCHAR(30),
+    cryptoname VARCHAR(30),
+    value INT,
+	FOREIGN KEY(username) REFERENCES users(username),
+    PRIMARY KEY(username,cryptoname)
+);
+
+CREATE TABLE stock (
+    username VARCHAR(30),
+    stockname VARCHAR(30),
+    value INT,
+	FOREIGN KEY(username) REFERENCES users(username),
+    PRIMARY KEY(username,stockname)
+);
