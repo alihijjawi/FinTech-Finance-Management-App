@@ -1,5 +1,3 @@
-#User class
-#has username, password, id(will be used as primary key)
 from ..app import db
 class User(db.Model):
     __tablename__ = "users"
