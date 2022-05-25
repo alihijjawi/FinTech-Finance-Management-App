@@ -1,7 +1,4 @@
-#crypto class
-#will have id as well as name
-#since the price changes, the price will not be saved in the db
-from app import db
+from ..app import db
 class Crypto(db.Model):
     __tablename__ ="cryptos"
     entry = db.Column(db.Integer(),primary_key=True,autoincrement=True)

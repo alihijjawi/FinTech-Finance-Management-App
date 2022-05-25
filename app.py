@@ -1,128 +1,81 @@
 import datetime
 import finnhub
-from flask import Flask, abort, session , render_template, request, jsonify
+from flask import Flask, abort, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String
-from flask_cors import CORS, cross_origin
-import os
+from sqlalchemy import *
+import jwt
+from flask_cors import CORS
+
 import requests
 import json
+
+from .db_config import DB_CONFIG
+
 finnhub_client = finnhub.Client(api_key="c9ommfaad3i8gdca97sg")
-app = Flask(__name__)
-app.secret_key = '\xf0?a\x9a\\\xff\xd4;\x0c\xcbHi'
-basedir = os.path.abspath(os.path.dirname(__file__))
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'Project_DB.db')
-engine = create_engine(app.config['SQLALCHEMY_DATABASE_URI'])
-db = SQLAlchemy(app)
-meta = MetaData()
 payload = {}
 headers= {}
-crypto_url = "http://api.coincap.io/v2/assets/"
 
+SECRET_KEY = "b'|\xe7\xbfU3`\xc4\xec\xa7\xa9zf:}\xb5\xc7\xb9\x139^3@Dv'"
+CRYPTO_URL = "http://api.coincap.io/v2/assets/"
 
-class User(db.Model):
-    __tablename__ = "users"
-    id = db.Column(db.Integer(),primary_key=True,autoincrement=True)
-    username=db.Column(db.String(50))
-    pwd = db.Column(db.String(50))
-    def __init__(self,username,pwd):
-        self.username=username
-        self.pwd=pwd
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = DB_CONFIG
+CORS(app)
+db = SQLAlchemy(app)
 
-class Stock(db.Model):
-    __tablename__ = "stocks"
-    entry = db.Column(db.Integer(),primary_key=True,autoincrement=True)
-    user_id = db.Column(db.Integer())
-    stock_name = db.Column(db.String(50))
-    amount = db.Column(db.Integer())
-    def __init__(self, user_id, stock_name, amount):
-        self.user_id = user_id
-        self.stock_name = stock_name
-        self.amount = amount
-
-class Crypto(db.Model):
-    __tablename__ ="cryptos"
-    entry = db.Column(db.Integer(),primary_key=True,autoincrement=True)
-    user_id=db.Column(db.Integer())
-    crypto_name=db.Column(db.String(50))
-    amount= db.Column(db.Integer())
-    def __init__(self,user_id,crypto_name,amount):
-        self.user_id=user_id
-        self.crypto_name=crypto_name
-        self.amount =amount
-
-class Bank(db.Model):
-    __tablename__ = "bank"
-    user_id=db.Column(db.Integer(),primary_key=True)
-    amount=db.Column(db.Integer())
-    def __init__(self,user_id,amount):
-        self.user_id=user_id
-        self.amount= amount
-
-
+from .model.user import User
+from .model.stock import Stock
+from .model.crypto import Crypto
+from .model.bank import Bank
 
 stock_name=[]
 crypto_name=[]
 
-userstable = Table('users', meta, Column('id', Integer, primary_key=True, autoincrement=True),
-                   Column('username', String ))
-banktable= Table('bank', meta, Column('user_id',Integer,primary_key=True,autoincrement=False),Column("amount",Integer))
-
-
-
-
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    user = User.query.filter_by(username=request.json["username"]).first()
-    if user is None:
+@app.route('/login', methods=['GET', 'POST']) #api to login
+def getAuth():
+    #username = request.json["username"]
+    #password = request.json["pwd"]
+    username = "bero"
+    password = "test"
+    user = User.query.filter_by(username=username).first()
+    if user is None: #username does not exists
         abort(403)
-    if (request.json["pwd"]!=user.pwd):
+    if (password!=user.pwd): #incorrect password
         abort(404)
-    return jsonify({"id":user.id})
+    tkn = create_token(username)
+    return jsonify(token=tkn)
 
 
-#sign up to the database and intialize stock and crypto values to 0
-@app.route('/signup', methods=['GET', 'POST'])
+@app.route('/signup', methods=['GET', 'POST']) #sign up to the database and intialize stock and crypto values to 0
 def signup():
     name = request.json['username']
     pwd = request.json['pwd']
 
-
-
-    if not name or not pwd:
-        # name is empty or pwd is empty
-        abort(400)
-    # check for unique name
-    not_unique = User.query.filter_by(username=name).first()
-    # similar username exists
-    if not_unique:
+    notUnique = User.query.filter_by(username=name).first() # check for unique name
+    if notUnique: # similar username exists
         abort(403)
-    else:
-        #create user add to db
-        newuser = User(name,pwd)
-        db.session.add(newuser)
-        newu= User.query.filter_by(username=name).first()
-        #create bank instance add to db
-        new_bank=Bank(newu.id,0)
-        db.session.add(new_bank)
+
+    else: #create user add to db
+        newUser = User(name,pwd)
+        db.session.add(newUser)
+        addedUser = User.query.filter_by(username=name).first()
+        newBank = Bank(addedUser.id,0) #create bank instance add to db
+        db.session.add(newBank)
         db.session.commit()
         return "success"
 
 
-
-
-#api to get all crypto currencies from db
-@app.route('/cryptocurrencies',methods=['GET'])
+@app.route('/cryptocurrencies',methods=['GET']) #api to get all crypto currencies from db
 def getAllCryptos():
     pass
-#api to get all stocks from db
-@app.route('/stocks',methods=['GET'])
+
+@app.route('/stocks',methods=['GET']) #api to get all stocks from db
 def getAllStocks():
     pass
-#api to get specific crypto curr
-@app.route('/cryptocurrencies/<crypto>',methods=['GET','POST'])
+
+@app.route('/cryptocurrencies/<crypto>',methods=['GET','POST']) #api to get specific crypto curr
 def getCrypto(crypto):
-    result = requests.request('GET',crypto_url+crypto,data=payload,headers=headers)
+    result = requests.request('GET',CRYPTO_URL+crypto,data=payload,headers=headers)
     ret = json.loads(result.text.encode('utf8'))
 
     return str(ret['data']['priceUsd'])
@@ -226,14 +179,27 @@ def getbank():
     user_bank= - Bank.query.filter_by(user_id=user_id)
     return jsonify({"money":user_bank.amount})
 
-
-
 def getPrices():
     pass
 
+def create_token(user_name):
+    payload = {
+    'exp': datetime.datetime.utcnow() + datetime.timedelta(days=4),
+    'iat': datetime.datetime.utcnow(),
+    'sub': user_name
+    }
+    return jwt.encode(
+    payload,
+    SECRET_KEY,
+    algorithm='HS256'
+    )
 
-
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
+def extract_auth_token(authenticated_request):
+    auth_header = authenticated_request.headers.get('Authorization')
+    if auth_header:
+        return auth_header.split(" ")[1]
+    else:
+        return None
+def decode_token(token):
+    payload = jwt.decode(token, SECRET_KEY, 'HS256')
+    return payload['sub']

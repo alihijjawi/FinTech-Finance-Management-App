@@ -1,4 +1,4 @@
-from app import db;
+from ..app import db;
 class Bank(db.Model):
     __tablename__ = "bank"
     user_id=db.Column(db.Integer(),primary_key=True)
