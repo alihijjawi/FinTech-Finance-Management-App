@@ -60,13 +60,13 @@ def signup():
         stocks=['AAPL','GOOGL','FB','TSLA']
         cryptos=['BTC','ETH','BNB']
         #stocks
-        for stk in stocks:
-            st = Stock(addedUser.id,stk,0)
-            db.session.add(st)
+        for stock in stocks:
+            currStock = Stock(addedUser.id,stock,0)
+            db.session.add(currStock)
         #cryptos
-        for cry in cryptos:
-            cryp = Crypto(addedUser.id,cry,0)
-            db.session.add(cryp)
+        for crypto in cryptos:
+            currCrypto = Crypto(addedUser.id,crypto,0)
+            db.session.add(currCrypto)
         db.session.commit()
         return "success"
 
@@ -74,12 +74,12 @@ def signup():
 @app.route('/cryptocurrencies',methods=['GET']) #api to get all crypto currencies from db
 def getAllCryptos():
     cryptos = ['bitcoin', 'ethereum', 'binance-coin']
-    short   = ['BTC','ETH','BNB']
+    cryptoID = ['BTC','ETH','BNB']
     prices = {}
     for i in range(len(cryptos)):
         temp = requests.request('GET', CRYPTO_URL+'/'+cryptos[i], data=payload, headers=headers)
         temp = json.loads(temp.text.encode('utf8'))
-        prices[short[i]] = temp['data']['priceUsd']
+        prices[cryptoID[i]] = temp['data']['priceUsd']
     return jsonify(prices)
 
 
@@ -90,20 +90,19 @@ def getAllStocks():
     for st in stocks:
         prices[st]=finnhub_client.quote(st)['c']
     return jsonify(prices)
+
 #api to get the current price in USD of the chose cryptocurrency
 @app.route('/cryptocurrencies/<crypto>',methods=['GET','POST']) #api to get specific crypto curr
 def getCrypto(crypto):
     result = requests.request('GET',CRYPTO_URL+'/'+str(crypto),data=payload,headers=headers)
-    ret = json.loads(result.text.encode('utf8'))
-    return ret['data']['priceUsd']
+    ret = json.loads(result.text.encode('utf8')) 
+    return jsonify({'price':ret['data']['priceUsd']})
 
 #api to get specific stock price
 @app.route('/stocks/<stock>',methods=['GET','POST'])
 def getStock(stock):
     #no need to handle wrong name because the api calls will be made for specific cryptos which we know
-    return jsonify({str(stock):finnhub_client.quote(stock)['c']})
-
-
+    return jsonify({'price':finnhub_client.quote(stock)['c']})
 
 #api to sell specific crypto, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
