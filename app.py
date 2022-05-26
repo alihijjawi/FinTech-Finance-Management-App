@@ -43,7 +43,7 @@ def getAuth():
     tkn = create_token(username)
     return jsonify(token=tkn)
 
-@app.route('/signup', methods=['GET', 'POST']) #sign up to the database and intialize stock and crypto values to 0
+@app.route('/signup', methods=['POST']) #sign up to the database and intialize stock and crypto values to 0
 def signup():
     username = request.json['username']
     password = request.json['pwd']

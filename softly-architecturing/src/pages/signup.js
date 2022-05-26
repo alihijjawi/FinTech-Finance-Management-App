@@ -2,8 +2,10 @@ import React from 'react';
 import { useState } from "react";
 import "../static/css/signup.css"
 import logo from "../static/images/logo.jpg";
+import { saveUserToken, getUserToken, clearUserToken } from '../localStorage';
 
 const SignUp = () => {
+	let [username, setUsername] = useState("");
 	let [pwdInput, setPwdInput] = useState("");
 	let [confPwdInput, setConfPwdInput] = useState("");
 	
@@ -11,6 +13,42 @@ const SignUp = () => {
 		if (pwdInput !== confPwdInput) {
 			alert("Passwords do not match.");
 		}
+		else{
+			singup()
+		}
+	}
+
+	function singup() {
+		var data = {
+			"username": username,
+			"pwd": pwdInput
+		}
+		console.log(username)
+		return fetch(`http://localhost:5000/signup`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+		}).then((response) => signIn());
+	}
+
+	function signIn(){
+		var data = {
+			"username": username,
+			"pwd": pwdInput
+		}
+		return fetch(`http://localhost:5000/login`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(data),
+		})
+			.then(response => response.json())
+			.then((body) => {
+				saveUserToken(body.token)
+			});
 	}
 	
 	return (
@@ -35,9 +73,7 @@ const SignUp = () => {
 					<img src={logo} alt="LMAO"/>
 				</div>
 				<div className="text-center mt-4 name">~Fintech Game~</div>
-				<form
-					onSubmit={verifyPassword}
-				>
+				<form>
 					<div className="form-field d-flex align-items-center">
 						<span className="far fa-user"></span>
 						<input
@@ -46,6 +82,8 @@ const SignUp = () => {
 							id="userName"
 							placeholder="Username"
 							autoComplete="off"
+							value={username}
+							onChange={({ target: { value } }) => setUsername(value)}
 							required
 						/>
 					</div>
@@ -73,11 +111,10 @@ const SignUp = () => {
 							required
 						/>
 					</div>
-					<button className="btn mt-3">Register</button>
-					<br />
 				</form>
+				<button className="btn mt-3" onClick={verifyPassword}>Register</button>
 				<div className="text-center fs-6">
-					<a href="/" className="button">BACK TO HOME</a>
+					<a href="/">BACK TO HOME</a>
 				</div>
 			</div>
 
