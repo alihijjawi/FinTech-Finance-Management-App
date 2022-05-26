@@ -31,34 +31,29 @@ from .model.bank import Bank
 stock_name=[]
 crypto_name=[]
 
-@app.route('/login', methods=['GET', 'POST']) #api to login
+@app.route('/login', methods=['POST']) #api to login
 def getAuth():
-    #username = request.json["username"]
-    #password = request.json["pwd"]
-    username = "bero"
-    password = "test"
+    username = request.json["username"]
+    password = request.json["pwd"]
     user = User.query.filter_by(username=username).first()
     if user is None: #username does not exists
         abort(403)
-    if (password!=user.pwd): #incorrect password
-        abort(404)
+    elif password != user.pwd: #incorrect password
+        abort(403)
     tkn = create_token(username)
     return jsonify(token=tkn)
 
-
 @app.route('/signup', methods=['GET', 'POST']) #sign up to the database and intialize stock and crypto values to 0
 def signup():
-    name = request.json['username']
-    pwd = request.json['pwd']
-
-    notUnique = User.query.filter_by(username=name).first() # check for unique name
+    username = request.json['username']
+    password = request.json['pwd']
+    notUnique = User.query.filter_by(username=username).first() # check for unique name
     if notUnique: # similar username exists
         abort(403)
-
     else: #create user add to db
-        newUser = User(name,pwd)
+        newUser = User(username,password)
         db.session.add(newUser)
-        addedUser = User.query.filter_by(username=name).first()
+        addedUser = User.query.filter_by(username=username).first()
         newBank = Bank(addedUser.id,0) #create bank instance add to db
         db.session.add(newBank)
         db.session.commit()
@@ -200,6 +195,7 @@ def extract_auth_token(authenticated_request):
         return auth_header.split(" ")[1]
     else:
         return None
+
 def decode_token(token):
     payload = jwt.decode(token, SECRET_KEY, 'HS256')
     return payload['sub']
