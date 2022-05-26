@@ -73,27 +73,22 @@ def signup():
 #api to get the price of all the crypto we chose
 @app.route('/cryptocurrencies',methods=['GET']) #api to get all crypto currencies from db
 def getAllCryptos():
-    btc =  requests.request('GET', CRYPTO_URL+'/bitcoin', data=payload, headers=headers)
-    eth = requests.request('GET', CRYPTO_URL+'/ethereum', data=payload, headers=headers)
-    bnb= requests.request('GET', CRYPTO_URL+'/binance-coin', data=payload, headers=headers)
-    btc=json.loads(btc.text.encode('utf8'))
-    eth = json.loads(eth.text.encode('utf8'))
-    bnb= json.loads(bnb.text.encode('utf8'))
-    prices={}
-    prices['BTC']=btc['data']['priceUsd']
-    prices['ETH'] = eth['data']['priceUsd']
-    prices['BNB'] = bnb['data']['priceUsd']
-
+    cryptos = ['bitcoin', 'ethereum', 'binance-coin']
+    short   = ['BTC','ETH','BNB']
+    prices = {}
+    for i in range(len(cryptos)):
+        temp = requests.request('GET', CRYPTO_URL+'/'+cryptos[i], data=payload, headers=headers)
+        temp = json.loads(temp.text.encode('utf8'))
+        prices[short[i]] = temp['data']['priceUsd']
     return jsonify(prices)
 
 
 @app.route('/stocks',methods=['GET']) #api to get all stocks from db
 def getAllStocks():
+    stocks = ['AAPL', 'GOOGL', 'FB', 'TSLA']
     prices={}
-    prices['AAPL']=finnhub_client.quote('AAPL')['c']
-    prices['TSLA'] = finnhub_client.quote('TSLA')['c']
-    prices['GOOGL'] = finnhub_client.quote('GOOGL')['c']
-    prices['FB'] = finnhub_client.quote('FB')['c']
+    for st in stocks:
+        prices[st]=finnhub_client.quote(st)['c']
     return jsonify(prices)
 #api to get the current price in USD of the chose cryptocurrency
 @app.route('/cryptocurrencies/<crypto>',methods=['GET','POST']) #api to get specific crypto curr
@@ -109,9 +104,6 @@ def getStock(stock):
     return jsonify({str(stock):finnhub_client.quote(stock)['c']})
 
 
-#TSLA GOOGL FB
-
-#tesla AAPL GOOGLE META
 
 #api to sell specific crypto, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
