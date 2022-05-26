@@ -16,7 +16,7 @@ payload = {}
 headers= {}
 
 SECRET_KEY = "b'|\xe7\xbfU3`\xc4\xec\xa7\xa9zf:}\xb5\xc7\xb9\x139^3@Dv'"
-CRYPTO_URL = "http://api.coincap.io/v2/assets/"
+CRYPTO_URL = "http://api.coincap.io/v2/assets"
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = DB_CONFIG
@@ -56,30 +56,62 @@ def signup():
         addedUser = User.query.filter_by(username=username).first()
         newBank = Bank(addedUser.id,0) #create bank instance add to db
         db.session.add(newBank)
+        #CREATE INSTANCES OF EACH CRYPTO AND STOCKS FOR THE USER AND SET AMOUNT TO 0
+        stocks=['AAPL','GOOGL','FB','TSLA']
+        cryptos=['BTC','ETH','BNB']
+        #stocks
+        for stk in stocks:
+            st = Stock(addedUser.id,stk,0)
+            db.session.add(st)
+        #cryptos
+        for cry in cryptos:
+            cryp = Crypto(addedUser.id,cry,0)
+            db.session.add(cryp)
         db.session.commit()
         return "success"
 
-
+#api to get the price of all the crypto we chose
 @app.route('/cryptocurrencies',methods=['GET']) #api to get all crypto currencies from db
 def getAllCryptos():
-    pass
+    btc =  requests.request('GET', CRYPTO_URL+'/bitcoin', data=payload, headers=headers)
+    eth = requests.request('GET', CRYPTO_URL+'/ethereum', data=payload, headers=headers)
+    bnb= requests.request('GET', CRYPTO_URL+'/binance-coin', data=payload, headers=headers)
+    btc=json.loads(btc.text.encode('utf8'))
+    eth = json.loads(eth.text.encode('utf8'))
+    bnb= json.loads(bnb.text.encode('utf8'))
+    prices={}
+    prices['BTC']=btc['data']['priceUsd']
+    prices['ETH'] = eth['data']['priceUsd']
+    prices['BNB'] = bnb['data']['priceUsd']
+
+    return jsonify(prices)
+
 
 @app.route('/stocks',methods=['GET']) #api to get all stocks from db
 def getAllStocks():
-    pass
-
+    prices={}
+    prices['AAPL']=finnhub_client.quote('AAPL')['c']
+    prices['TSLA'] = finnhub_client.quote('TSLA')['c']
+    prices['GOOGL'] = finnhub_client.quote('GOOGL')['c']
+    prices['FB'] = finnhub_client.quote('FB')['c']
+    return jsonify(prices)
+#api to get the current price in USD of the chose cryptocurrency
 @app.route('/cryptocurrencies/<crypto>',methods=['GET','POST']) #api to get specific crypto curr
 def getCrypto(crypto):
-    result = requests.request('GET',CRYPTO_URL+crypto,data=payload,headers=headers)
+    result = requests.request('GET',CRYPTO_URL+'/'+str(crypto),data=payload,headers=headers)
     ret = json.loads(result.text.encode('utf8'))
-
-    return str(ret['data']['priceUsd'])
+    return ret['data']['priceUsd']
 
 #api to get specific stock price
 @app.route('/stocks/<stock>',methods=['GET','POST'])
 def getStock(stock):
-    return finnhub_client.quote(stock)
+    #no need to handle wrong name because the api calls will be made for specific cryptos which we know
+    return jsonify({str(stock):finnhub_client.quote(stock)['c']})
 
+
+#TSLA GOOGL FB
+
+#tesla AAPL GOOGLE META
 
 #api to sell specific crypto, expects user token/id as well as amount to sell
 #will update amount of money the user has in the bank on sell
@@ -95,7 +127,7 @@ def sellCrypto():
     #update amount of crypto owned
     user_crypto=Crypto.query.filter_by(user_id=user_id,crypto_name=crypto_name)
     if user_crypto.amount-amount<0:
-        user_crypto.amount=0
+        abort()
     else:
         user_crypto.amount = user_crypto.amount-amount
     db.session.commit()
@@ -117,7 +149,7 @@ def sellStock():
     # update amount of crypto owned
     user_stock = Stock.query.filter_by(user_id=user_id, stock_name=stock_name)
     if user_stock.amount - amount < 0:
-        user_stock.amount = 0
+        abort()
     else:
         user_stock.amount = user_stock.amount - amount
     db.session.commit()
@@ -134,7 +166,7 @@ def buyCrypto():
     # update money in bank
     user_bank = Bank.query.filter_by(user_id=user_id)
     if user_bank.amount-(int(price) * int(amount))<0:
-        user_bank.amount = 0  
+        abort()
     else: 
         user_bank.amount=user_bank.amount-(int(price) * int(amount))
     # update amount of crypto owned
@@ -156,7 +188,7 @@ def buyStock():
     # update money in bank
     user_bank = Bank.query.filter_by(user_id=user_id)
     if user_bank.amount - (int(price) * int(amount)) < 0:
-        user_bank.amount = 0  
+        abort()
     else: 
         user_bank.amount = user_bank.amount - (int(price) * int(amount)) < 0
     # update amount of crypto owned
