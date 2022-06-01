@@ -15,7 +15,7 @@ const About = () => {
 				<Link to="/bank"><p class="text">BANK</p></Link>
 			</div>
 			<div id="options" class="bottomL">
-				<Link to="/store"><p class="text">STORE</p></Link>
+				<Link to="/shop"><p class="text">SHOP</p></Link>
 			</div>
 			<div id="credits" class="bottomR">
 				<Link to="/something"><p class="text">something</p></Link>

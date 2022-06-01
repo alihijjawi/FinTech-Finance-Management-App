@@ -1,0 +1,99 @@
+.button {
+    position: relative;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 22px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  
+  .title {
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    text-decoration: none;
+    text-indent: 365px;
+    display: inline-block;
+    font-size: 50px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+  
+  .text {
+    color: white;
+    margin-top: 0.6em;
+    font-size: 50px;
+  }
+  
+  .img {
+    width: 300px;
+    height: 481px;
+    object-fit: cover;
+  }
+  
+  div.user {
+    position: relative;
+    left: 1700px;
+    bottom: 550px;
+    width: 300px;
+    height: 481px;
+  }
+  
+  div.div {
+    position: relative;
+    left: 400px;
+    bottom: -200px;
+    width: 100%;
+    height: 600px;
+    max-width: 1200px;
+    border: 3px solid #fefefe;
+  }
+  
+  div.left {
+    position: relative;
+    left: 50px;
+    top: 50px;
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 150px;
+    max-height: 150px;
+    border: 3px solid #fefefe;
+  }
+  
+  div.right {
+    position: relative;
+    left: 600px;
+    top: -105px;
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 150px;
+    max-height: 150px;
+    border: 3px solid #fefefe;
+  }
+  
+  div.bottomR {
+    position: relative;
+    left: 600px;
+    top: -225px;
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 150px;
+    max-height: 150px;
+    border: 3px solid #fefefe;
+  }
+  
+  div.bottomL {
+    position: relative;
+    left: 50px;
+    top: -70px;
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 150px;
+    max-height: 150px;
+    border: 3px solid #fefefe;
+  }
